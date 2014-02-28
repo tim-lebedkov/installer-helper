@@ -1,3 +1,4 @@
+rem This script is available since version 1.3
 rem This script removes a program installed by an InnoSetup installer.
 rem 
 rem Script parameters: name of the uninstall program. If the parameter is empty

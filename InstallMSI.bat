@@ -1,3 +1,4 @@
+rem This script is available since version 1
 rem This script installs an .msi file as Npackd package
 rem There must be only one .msi file in the current directory. 
 rem 
@@ -6,6 +7,7 @@ rem %1 - name of the MSI parameter like INSTALLDIR that changes the installation
 rem directory. Other often used values are TARGETDIR and INSTALLLOCATION
 rem %2 - optional parameter. If this value is "yes", the default uninstall
 rem script Uninstall.bat is also created to remove the MSI package later.
+rem This option is available since 1.1
 for /f "delims=" %%x in ('dir /b *.msi') do set setup=%%x
 mkdir .Npackd
 move "%setup%" .Npackd

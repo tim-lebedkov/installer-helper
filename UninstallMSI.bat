@@ -1,3 +1,4 @@
+rem This script is available since version 1
 rem This script uninstalls an .msi file as Npackd package previosly installed
 rem by InstallMSI.bat.
 move .Npackd\*.msi .

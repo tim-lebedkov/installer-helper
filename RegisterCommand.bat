@@ -1,3 +1,9 @@
+rem WARNING: since version 1.9 this script is deprecated and should not be used.
+rem The recommended way of installing a command line program is to create a new
+rem directory under "C:\Program Files", add it to the PATH environment variable
+rem and put the proxy .exe files there created by "EXE Proxy".
+rem
+rem
 rem This script is available since version 1.7
 rem This script registers the a binary as a command line utility available 
 rem in the "C:\Commands" directory. A user can add this directory to the PATH
@@ -26,8 +32,6 @@ mklink /D "%SYSTEMDRIVE%\Commands\%~nx1" "%filename%" || exit /b %errorlevel%
 goto eof
 
 :exeproxy
-set onecmd="%npackd_cl%\npackdcl.exe" "path" "--package=exeproxy" "--versions=[0.2, 1)"
-for /f "usebackq delims=" %%x in (`%%onecmd%%`) do set exeproxy=%%x
-"%exeproxy%\exeproxy.exe" exeproxy-copy "%SYSTEMDRIVE%\Commands\%~nx1" "%filename%"
+"%~dp0\private\exeproxy.exe" exeproxy-copy "%SYSTEMDRIVE%\Commands\%~nx1" "%filename%"
 
 

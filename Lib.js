@@ -31,6 +31,23 @@ L.sendKeysToWindow = function(title, keys) {
     WScript.Sleep(10000);
     sh.SendKeys(keys);
 };
+
+/**
+ * Adds a property to an .msi file.
+ *
+ * @param msi the name of the .msi file
+ * @param property the name of the property (e.g. APPDIR)
+ * @param value property value (e.g. C:\)
+ */
+L.addPropertyToMSI = function(msi, property, value) {
+    var installer = WScript.CreateObject("WindowsInstaller.Installer");
+    var database = installer.OpenDatabase(msi, 1);
+    var view = database.OpenView("INSERT INTO Property (Property, Value) VALUES ('" +  
+            property + "', '" + value + "')");
+    view.Execute(null);
+    database.Commit();
+};
+
 return L;
 
 }).call()

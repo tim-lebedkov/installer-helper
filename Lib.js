@@ -5,13 +5,14 @@
  * used via cscript.exe e.g. from .Npackd\Install.bat:
  *     cscript //Nologo //E:JScript //T:300 //U .Npackd\Install.js
  *
- * ...and in the Install.js script (the environment variable "NIH" should point
- * to a valid directory with Installer Helper):
+ * ...and in the Install.js script The environment variable "NIH" below
+ * should point to a valid directory with Installer Helper:
  *     var fs = new ActiveXObject("Scripting.FileSystemObject");
  *     var sh = WScript.CreateObject("WScript.Shell");
  *     var lib = eval(fs.OpenTextFile(
  *          sh.ExpandEnvironmentStrings("%NIH%") + "\\Lib.js", 1).ReadAll());
  *
+ *     lib.installerHelper = sh.ExpandEnvironmentStrings("%NIH%");
  *     lib.sendKeysToWindow("NetSurf - NetSurf Uninstall", "{ENTER}");
  */
 (function () {
@@ -54,7 +55,8 @@ L.addPropertyToMSI = function(msi, property, value) {
 /**
  * This function is available since 1.12.
  *
- * Searches for a file in the current directory with the given extension.
+ * Searches for a file in the specified directory using the specified regular
+ * expression.
  *
  * @param dir directory name. Use "." for the current directory.
  * @param re regular expression for the file name. Example: /\.js$/i
@@ -64,6 +66,31 @@ L.findFile = function(dir, re) {
     var fso = new ActiveXObject("Scripting.FileSystemObject");
     var f = fso.GetFolder(dir);
     var fc = new Enumerator(f.files);
+    var result = null;
+    for (; !fc.atEnd(); fc.moveNext()) {
+        var file = fc.item();
+        if (file.name.match(re)) {
+            result = file.name;
+            break;
+        }
+    }
+    return result;
+};
+
+/**
+ * This function is available since 1.13.
+ *
+ * Searches for a directory in the specified directory using the specified regular
+ * expression.
+ *
+ * @param dir directory name. Use "." for the current directory.
+ * @param re regular expression for the file name. Example: /\.js$/i
+ * @return the found file name without the path or null
+ */
+L.findDir = function(dir, re) {
+    var fso = new ActiveXObject("Scripting.FileSystemObject");
+    var f = fso.GetFolder(dir);
+    var fc = new Enumerator(f.SubFolders);
     var result = null;
     for (; !fc.atEnd(); fc.moveNext()) {
         var file = fc.item();
@@ -242,15 +269,55 @@ L.unregisterOpenWith = function(key, extensions) {
     }
 };
 
+/**
+ * This function is available since 1.13.
+ *
+ * Unpacks the specified file or directory and deletes
+ * the file or directory. Unpacking a directory means moving all the contents
+ * one level up.
+ *
+ * @param file a .7z, .tar, .gz file or a directory. All other file extensions
+ *     will result in an error.
+ * @param target target directory
+ */
+L.unpackAndDelete = function(file, target) {
+    var fs = new ActiveXObject("Scripting.FileSystemObject");
+    if (fs.FolderExists(file)) {
+        var f = fs.GetFolder(file);
+        try {
+            fs.MoveFile(f.Path + "\\*", target);
+        } catch (e) {
+            // ignore. This can happen if there are no files in the directory.
+        }
+        try {
+            fs.MoveFolder(f.Path + "\\*", target);
+        } catch (e) {
+            // ignore. This can happen if there are not sub-directories.
+        }
+        f.Delete(true);
+    } else {
+        var r = L.exec("\"" + this.installerHelper + 
+                "\\private\\7za.exe\" x " +
+                "\"" + file + "\" " + 
+                "-o\"" + target + "\"");
+        if (r[0] !== 0)
+            throw new Error("Failed to unpack the .7z file " + file);
+        fs.DeleteFile(file);
+    }
+};
+
 var TESTING = false;
 
 if (TESTING) {
+    L.installerHelper = "C:\\Users\\t\\projects\\installer-helper";
     // WScript.Echo(L.findFile(".", /\.js$/i));
     //L.registerOpenWith("org.test",  '"C:\\Program Files\\7-zip\\7zFM.exe" "%1"',
     //        "Test 7373", [".001", ".7z"]);
     // L.unregisterOpenWith("org.test", [".001", ".7z"]);
     // L.installMSI(null, "INSTALLDIR");
-    L.uninstallMSI(null);
+    //L.uninstallMSI(null);
+    //L.unpackAndDelete("test", ".");
+    WScript.Echo(L.findDir(".", /^pri/i));
 }
 
 return L;

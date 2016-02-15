@@ -25,4 +25,4 @@ if %err% equ 3010 goto cont
 if %err% neq 0 exit %err%
 
 :cont
-if "%2" equ "yes" copy "%~dp0\private\UninstallMSIDefault.bat" .Npackd\Uninstall.bat
+if "%2" equ "yes" copy "%~dp0\UninstallMSI.bat" .Npackd\Uninstall.bat

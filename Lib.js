@@ -7,6 +7,8 @@
  *
  * ...and in the Install.js script The environment variable "NIH" below
  * should point to a valid directory with Installer Helper:
+ *
+ * try {
  *     var fs = new ActiveXObject("Scripting.FileSystemObject");
  *     var sh = WScript.CreateObject("WScript.Shell");
  *     var lib = eval(fs.OpenTextFile(
@@ -14,6 +16,11 @@
  *
  *     lib.installerHelper = sh.ExpandEnvironmentStrings("%NIH%");
  *     lib.sendKeysToWindow("NetSurf - NetSurf Uninstall", "{ENTER}");
+ * } catch (e) {
+ *     WScript.Echo(e.name + ": " + e.message);
+ *     WScript.Echo(e.number + ": " + e.description);
+ *     WScript.Quit(1);
+ * }
  */
 (function () {
 
@@ -84,7 +91,7 @@ L.findFile = function(dir, re) {
  * expression.
  *
  * @param dir directory name. Use "." for the current directory.
- * @param re regular expression for the file name. Example: /\.js$/i
+ * @param re regular expression for the file name. Example: /^KeePassX-/i
  * @return the found file name without the path or null
  */
 L.findDir = function(dir, re) {

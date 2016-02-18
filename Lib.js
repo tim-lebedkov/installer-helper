@@ -313,6 +313,77 @@ L.unpackAndDelete = function(file, target) {
     }
 };
 
+/**
+ * This function is available since 1.15.
+ *
+ * Removes the whitespace characters at the beginning and at the end of a 
+ * string. All characters that match \s in regular expressions will be remove.
+ *
+ * @param value text with spaces
+ * @return text without spaces
+ */
+L.trim = function(value) {
+    var w = new RegExp("^\\s+","gm");
+    var w2 = new RegExp("\\s+$","gm");
+    return value.replace(w, "").replace(w2, "");
+};
+
+/**
+ * This function is available since 1.15.
+ *
+ * Lists the sub-keys from the Windows registry.
+ *
+ * @param key path to a registry key, e.g. 
+ * HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall
+ * @return array of child keys. Full paths will be returned in every element.
+ *     Example: HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Adobe Flash Player ActiveX
+ */
+L.listRegistryKeys = function(key) {
+    var r = L.exec("reg.exe query \"" + key + "\"");
+    if (r[0] === 0) {
+        var result = [];
+        var output = r[1];
+        for (var i = 0; i < output.length; i++) {
+            if (L.trim(output[i]).length !== 0) {
+                result.push(output[i]);
+            }
+        }
+        return result;
+    } else {
+        throw new Error("reg.exe exited with the code " + r[0]);
+    }
+};
+
+/**
+ * This function is available since 1.15.
+ *
+ * Removes from "a" all elements that also exist in "b". 
+ * The order of the elements is not important. The elements are compared using
+ * the operator "===".
+ *
+ * @param a the first array
+ * @param b the second array
+ * @return "a" without all elements in "b"
+ */
+L.subArrays = function(a, b) {
+    var result = [];
+    for (var i = 0; i < a.length; i++) {
+        var ai = a[i];
+        var found = false;
+        for (var j = 0; j < b.length; j++) {
+            var bj = b[j];
+            if (ai === bj) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            result.push(ai);
+        }
+    }
+    return result;
+};
+
 var TESTING = false;
 
 if (TESTING) {
@@ -324,7 +395,13 @@ if (TESTING) {
     // L.installMSI(null, "INSTALLDIR");
     //L.uninstallMSI(null);
     //L.unpackAndDelete("test", ".");
-    WScript.Echo(L.findDir(".", /^pri/i));
+    //WScript.Echo(L.findDir(".", /^pri/i));
+    //WScript.Echo(L.listRegistryKeys("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall").length);
+    //WScript.Echo("12" === "1" + "2");
+    //WScript.Echo(L.subArrays(["12d", "2", "8"], ["8", "2"])[0]);
+    //var before = L.listRegistryKeys("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall");
+    //var after = L.listRegistryKeys("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall");
+    //WScript.Echo("Difference: " + before.length + " " + after.length + " " + L.subArrays(after, before).length);
 }
 
 return L;

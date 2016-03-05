@@ -13,8 +13,8 @@
  *     var sh = WScript.CreateObject("WScript.Shell");
  *     var lib = eval(fs.OpenTextFile(
  *          sh.ExpandEnvironmentStrings("%NIH%") + "\\Lib.js", 1).ReadAll());
- *
  *     lib.installerHelper = sh.ExpandEnvironmentStrings("%NIH%");
+ *
  *     lib.sendKeysToWindow("NetSurf - NetSurf Uninstall", "{ENTER}");
  * } catch (e) {
  *     WScript.Echo(e.name + ": " + e.message);
@@ -384,6 +384,31 @@ L.subArrays = function(a, b) {
     return result;
 };
 
+/**
+ * This function is available since 1.16.
+ *
+ * Detects the system type: 32 bit or 64 bit.
+ *
+ * @return true if this system runs a 64 bit Windows
+ */
+L.is64bit = function() {
+    var r = false;
+
+    var sh = WScript.CreateObject("WScript.Shell");
+    var env = sh.Environment("Process");
+
+    // WScript.Echo("PROCESSOR_ARCHITECTURE: " + env("PROCESSOR_ARCHITECTURE"));
+    // WScript.Echo("PROCESSOR_ARCHITEW6432: " + env("PROCESSOR_ARCHITEW6432"));
+
+    if (env("PROCESSOR_ARCHITECTURE") === "x86") {
+        r = env("PROCESSOR_ARCHITEW6432") !== "";
+    } else {
+        r = true;
+    }
+
+    return r;
+}
+
 var TESTING = false;
 
 if (TESTING) {
@@ -402,6 +427,7 @@ if (TESTING) {
     //var before = L.listRegistryKeys("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall");
     //var after = L.listRegistryKeys("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall");
     //WScript.Echo("Difference: " + before.length + " " + after.length + " " + L.subArrays(after, before).length);
+    WScript.Echo("64 bit: " + L.is64bit());
 }
 
 return L;

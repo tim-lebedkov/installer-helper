@@ -27,17 +27,26 @@
 var L = {/* library interface */};
 
 /**
- * Wait for the dialog with the specified title and presses ENTER.
+ * Wait for the dialog with the specified title and emulates key press.
  *
  * @param title dialog title
  * @param keys e.g. "{ENTER}". See WScript.SendKeys for more details
  */
 L.sendKeysToWindow = function(title, keys) {
     var sh = WScript.CreateObject("WScript.Shell");
-    WScript.Sleep(60000);
-    sh.AppActivate(title);
-    WScript.Sleep(10000);
-    sh.SendKeys(keys);
+    var found = false;
+    for (var i = 0; i < 60; i++) {
+        WScript.Sleep(1000);
+        if (sh.AppActivate(title)) {
+            found = true;
+            break;
+        }
+    }
+    
+    if (found) {
+        WScript.Sleep(10000);
+        sh.SendKeys(keys);
+    }
 };
 
 /**
@@ -412,6 +421,7 @@ L.is64bit = function() {
 var TESTING = false;
 
 if (TESTING) {
+	
     L.installerHelper = "C:\\Users\\t\\projects\\installer-helper";
     // WScript.Echo(L.findFile(".", /\.js$/i));
     //L.registerOpenWith("org.test",  '"C:\\Program Files\\7-zip\\7zFM.exe" "%1"',
@@ -427,7 +437,8 @@ if (TESTING) {
     //var before = L.listRegistryKeys("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall");
     //var after = L.listRegistryKeys("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall");
     //WScript.Echo("Difference: " + before.length + " " + after.length + " " + L.subArrays(after, before).length);
-    WScript.Echo("64 bit: " + L.is64bit());
+    //WScript.Echo("64 bit: " + L.is64bit());
+    WScript.Echo(typeof {}["name"] === "undefined");
 }
 
 return L;

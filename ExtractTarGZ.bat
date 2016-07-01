@@ -4,6 +4,5 @@ rem
 rem Script parameters:
 rem %1 - name of the .tar.gz file. The value should end with ".tar.gz"
 rem
-"%~dp0\private\tar.exe" -xvzf "%~1" > .Npackd\Output.txt 2>&1 && type .Npackd\Output.txt
-if %errorlevel% neq 0 exit /b %errorlevel%
+"%SYSTEMROOT%\System32\cscript.exe" "%~dp0\private\ExtractTarGZ.js" //NoLogo //U //E:JScript "%~dp0" "%~1"
 

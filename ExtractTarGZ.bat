@@ -1,3 +1,6 @@
+rem WARNING: since version 1.19 this script is deprecated and should not be used.
+rem Please use Extract.bat instead.
+rem
 rem This script is available since version 1.6
 rem This script extracts a .tar.gz file.
 rem 

@@ -1,3 +1,6 @@
+rem WARNING: since version 1.19 this script is deprecated and should not be used.
+rem Please use Extract.bat instead.
+rem
 rem This script is available since version 1.4
 rem This script "extracts" a directory by moving its contents one level up
 rem and deleting the directory.

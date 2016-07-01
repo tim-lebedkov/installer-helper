@@ -288,12 +288,13 @@ L.unregisterOpenWith = function(key, extensions) {
 /**
  * This function is available since 1.13.
  * Since 1.18 .tar.gz is also supported.
+ * Since 1.19 .tar.xz is also supported.
  *
  * Unpacks the specified file or directory and deletes
  * the file or directory. Unpacking a directory means moving all the contents
  * one level up.
  *
- * @param file a .7z, .tar, .gz or .tar.gz file or a directory. 
+ * @param file a .7z, .tar, .gz, .tar.gz or .tar.xz file or a directory. 
  *     All other file extensions will result in an error.
  * @param target target directory
  */
@@ -312,12 +313,12 @@ L.unpackAndDelete = function(file, target) {
             // ignore. This can happen if there are not sub-directories.
         }
         f.Delete(true);
-    } else if (file.match(/\.tar\.gz$/i)) {
+    } else if (file.match(/\.tar\.gz$/i) || file.match(/\.tar\.xz$/i)) {
         var r = L.exec("\"" + this.installerHelper + 
                 "\\private\\7za.exe\" x " +
                 "\"" + file + "\"");
         if (r[0] !== 0)
-            throw new Error("Failed to unpack the .gz file " + file);
+            throw new Error("Failed to unpack the .gz/.xz file " + file);
         fs.DeleteFile(file);
         
         file = file.substring(0, file.length - 3);

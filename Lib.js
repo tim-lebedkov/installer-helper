@@ -185,7 +185,7 @@ L.installMSI = function(msi, property) {
             "/Lime \"" + tname + "\" " +
             "/i \"" + msi + "\" " + 
             property + "=\"" + curDir + "\" ALLUSERS=1 MSIFASTINSTALL=7");
-    var result = L.exec("cmd.exe /c type \"" + tname + "\" 2>&1");
+    var result = L.exec("cmd.exe /d /c type \"" + tname + "\" 2>&1");
 
     // list of errors: http://msdn.microsoft.com/en-us/library/windows/desktop/aa368542(v=vs.85).aspx
     // 3010=restart required
@@ -217,7 +217,7 @@ L.uninstallMSI = function(msi) {
             "/Lime \"" + tname + "\" " +
             "/x \"" + msi + "\" " + 
             " MSIFASTINSTALL=7");
-    var result = L.exec("cmd.exe /c type \"" + tname + "\"");
+    var result = L.exec("cmd.exe /d /c type \"" + tname + "\"");
 
     // list of errors: http://msdn.microsoft.com/en-us/library/windows/desktop/aa368542(v=vs.85).aspx
     // 3010=restart required

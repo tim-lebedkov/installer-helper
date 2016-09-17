@@ -1,8 +1,12 @@
 /**
  * This script is available since version 1.10.
  *
- * It contains useful code for installing and removing software and can be 
- * used via cscript.exe e.g. from .Npackd\Install.bat:
+ * This library contains useful code for installing and removing software.
+ * Since version 1.20 of the Installer Helper the preferred way to run
+ * a JScript file is to use the "ExecJS.bat". 
+ *
+ * This library can be used alternatively
+ * via cscript.exe e.g. from .Npackd\Install.bat:
  *     cscript //Nologo //E:JScript //T:300 //U .Npackd\Install.js
  *
  * ...and in the Install.js script The environment variable "NIH" below
@@ -22,7 +26,7 @@
  *     WScript.Quit(1);
  * }
  */
-(function () {
+lib = (function () {
 
 var L = {/* library interface */};
 
@@ -436,6 +440,28 @@ L.is64bit = function() {
     return r;
 }
 
+/**
+ * This function is available since 1.20.
+ *
+ * Safely executes another function logging the possible error to the 
+ * console and exiting the execution with the exit code 1.
+ *
+ * @param f this function will be executed. The only parameter is this 
+ *     library object (see the variable L in this file).
+ * @return true if this system runs a 64 bit Windows
+ */
+L.safe = function(f) {
+	try {
+		f(L);
+	} catch (e) {
+		WScript.Echo(e.name + ": " + e.message);
+		WScript.Echo(e.number + ": " + e.description);
+		WScript.Quit(1);
+	}
+}
+
+L.installerHelper = WScript.arguments(0);
+
 var TESTING = false;
 
 if (TESTING) {
@@ -461,5 +487,6 @@ if (TESTING) {
 
 return L;
 
-}).call()
+}).call();
 
+lib

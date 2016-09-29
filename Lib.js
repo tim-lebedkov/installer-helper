@@ -460,7 +460,55 @@ L.safe = function(f) {
 	}
 }
 
-L.installerHelper = WScript.arguments(0);
+/**
+ * This function is available since 1.21.
+ *
+ * Removes an application silently by its title in the Control Panel "Software".
+ *
+ * @param re regular expression to match the program title
+ *     Example: /my editor/i
+ * @param silent true = use the silent command, false = use the normal removal command
+ * @param bits64 true = search for 64 bit programs, false = search for 32 bit
+ *     programs
+ * @return true if the program was found and removed,
+ *     false otherwise
+ */
+L.uninstallByTitle = function(re, silent, bits64) {
+    var shell = WScript.CreateObject("WScript.Shell");
+	var middle = "";
+	if (L.is64bit()) {
+		if (!bits64)
+			middle = "Wow6432Node";
+	}
+    var keys = L.listRegistryKeys("HKEY_LOCAL_MACHINE\\SOFTWARE\\" + 
+			middle + 
+			"\\Microsoft\\Windows\\CurrentVersion\\Uninstall");
+	var suffix = silent ? "QuietUninstallString": "UninstallString";
+    for (var i = 0; i < keys.length; i++) {
+		try {
+			var dn = shell.RegRead(keys[i] + "\\DisplayName");
+		} catch (e) {
+			// ignore
+			continue;
+		}
+        if (dn.match(re)) {
+			var cmd = shell.ExpandEnvironmentStrings(
+					shell.RegRead(keys[i] + "\\" + suffix));
+			if (L.trim(cmd) !== "") {
+				var r = L.exec(cmd);
+				if (r[0] !== 0)
+					throw new Error("The uninstall command failed with the exit code " + r[0]);
+				return true;
+			} else {
+				throw new Error("Empty uninstall command found for " + dn);
+			}
+		}
+    }
+	
+	return false;
+};
+
+L.installerHelper = WScript.arguments.length > 0 ? WScript.arguments(0) : "";
 
 var TESTING = false;
 
@@ -482,7 +530,8 @@ if (TESTING) {
     //var after = L.listRegistryKeys("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall");
     //WScript.Echo("Difference: " + before.length + " " + after.length + " " + L.subArrays(after, before).length);
     //WScript.Echo("64 bit: " + L.is64bit());
-    WScript.Echo(typeof {}["name"] === "undefined");
+    //WScript.Echo(typeof {}["name"] === "undefined");
+	WScript.Echo(L.uninstallByTitle(/poedit/i, true, false));
 }
 
 return L;

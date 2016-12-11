@@ -1,83 +1,99 @@
 # Npackd Installer Helper #
 ## Introduction ##
-The Npackd installer helper package contains scripts and programs usefule for installing and removing Npackd packages silently.
-It contains code for most common installers like NSIS and compression formats like .tgz. There is also code for
-automating installers that do not support silent operation, code to modify .msi files, etc.
-Please see the corresponding files in the root directory for more documentation.
+The Npackd Installer Helper package contains scripts and programs useful for
+installing and removing Npackd packages silently. It contains code for most 
+common installers like NSIS and compression formats like .tgz. There is also
+code for automating installers that do not support silent operation, code to
+modify .msi files, etc. Please see the corresponding files in the root directory
+for more documentation and e.g. http://ss64.com/nt/ for more information on
+batch programming.
+
+The following snippet shows how a simple InnoSetup based installer can be 
+installed and removed via the Npackd Installer Helper. Please refer to the 
+scripts in Npackd Installer Helpers for the minimum version necessary to use
+particular features.
+
+```XML
+    <version name="16.4" package="org.example.MyProgram" type="one-file">
+        <file path=".Npackd\Install.bat">call "%nih%\InstallInnoSetup.bat"</file>
+        <file path=".Npackd\Uninstall.bat">call "%nih%\UninstallInnoSetup.bat" unins000.exe</file>
+        <url>http://www.example.org/MyProgramInstaller.exe</url>
+        <dependency package="com.googlecode.windows-package-manager.NpackdInstallerHelper" versions="[1.3, 2)">
+            <variable>nih</variable>
+        </dependency>
+    </version>
+```
 
 ## NSIS ##
 
-Most (but not all) NSIS-based installers recognize the /S and /D options (silent installation and target directory). If yours does not, all you can do is to ask the installer creator to change this. The /D option is especially important as this is probably the only way to know where the uninst.exe will be created. The uninst.exe can have a different name depending on the installer script. Note that the target directory should not be quoted even if it contains spaces in it. Most installers also require that the target directory is a full path. Note that the parameters use capital letters. Some NSIS un-installation routines delete all files in the installation directory. It is necessary to install packages in a subdirectory in such cases.
-
-.Npackd\Install.bat sample:
-```Batchfile
-for /f "delims=" %%x in ('dir /b *.exe') do set setup=%%x
-"%setup%" /S /D=%CD% && del /f /q "%setup%"
-```
-
-.Npackd\Uninstall.bat sample:
-```Batchfile
-uninst.exe /S _?=%CD%
-```
-
-## MSI via NpackdInstallerHelper ##
-The recommended way to install an .msi package is by using the NpackdInstallerHelper:
+The recommended way to install an NSIS package is by using the following scripts:
 ```XML
-        <file path=".Npackd\Install.bat">call "%npackdih%\InstallMSI.bat" INSTALLDIR yes</file>
-        <dependency package="com.googlecode.windows-package-manager.NpackdInstallerHelper" versions="[1.1, 2)">
-            <variable>NIH</variable>
+    <version name="16.4" package="org.example.MyProgram" type="one-file">
+        <url>http://www.example.org/MyProgramInstaller.exe</url>
+        <file path=".Npackd\Install.bat">"%nih%\InstallNSIS.bat"</file>
+        <file path=".Npackd\Uninstall.bat">"%nih%\UninstallNSIS.bat"</file>
+        <dependency package="com.googlecode.windows-package-manager.NpackdInstallerHelper" versions="[1.22, 2)">
+            <variable>nih</variable>
         </dependency>
-        <dependency package="com.googlecode.windows-package-manager.NpackdCL" versions="[1.15.7, 2)"/>
+    </version>
 ```
 
-## MSI without NpackdInstallerHelper ##
-/qn is the most "silent" option. TARGETDIR does not always work and always requires an absolute path, but you can uninstall your application either by using the GUID of the installer or the msi file itself as shown below. The ALLUSERS=1 option installs the application for all users.
-
-.Npackd\Install.bat sample:
-```Batchfile
-for /f "delims=" %%x in ('dir /b *.msi') do set setup=%%x
-copy "%setup%" .Npackd
-msiexec.exe /qn /norestart /Lime .Npackd\MSI.log /i "%setup%" TARGETDIR="%CD%" ALLUSERS=1 && del /f /q "%setup%"
-set err=%errorlevel%
-type .Npackd\MSI.log
-rem 3010=restart required
-if %err% equ 3010 exit 0
-if %err% neq 0 exit %err%
-```
-
-.Npackd\Uninstall.bat sample:
-```Batchfile
-move .Npackd\*.msi .
-for /f "delims=" %%x in ('dir /b *.msi') do set setup=%%x
-msiexec.exe /qn /norestart /Lime .Npackd\MSI.log /x "%setup%"
-set err=%errorlevel%
-type .Npackd\MSI.log
-rem 3010=restart required
-if %err% equ 3010 exit 0
-if %err% neq 0 exit %err%
-```
-
-Uninstalling via an MSI GUID:
+## MSI ##
+The recommended way to install an .msi package is by using the following scripts:
 ```XML
+    <version name="16.4" package="org.example.MyProgram" type="one-file">
+        <url>http://www.example.org/MyProgramInstaller.msi</url>
+        <file path=".Npackd\Install.bat">call "%nih%\InstallMSI.bat" INSTALLDIR yes</file>
+        <dependency package="com.googlecode.windows-package-manager.NpackdInstallerHelper" versions="[1.22, 2)">
+            <variable>nih</variable>
+        </dependency>
+    </version>
+```
+
+## Uninstalling an MSI package via its GUID ##
+```XML
+    <version name="16.4" package="org.example.MyProgram" type="one-file">
+        <url>http://www.example.org/MyProgramInstaller.msi</url>
+        <file path=".Npackd\Install.bat">call "%nih%\InstallMSI.bat" INSTALLDIR</file>
         <file path=".Npackd\Uninstall.bat">MsiExec.exe /qn /norestart /Lime .Npackd\MSI.log /X{1D2C96C3-A3F3-49E7-B839-95279DED837F}
 set err=%errorlevel%
 type .Npackd\MSI.log
 if %err% neq 0 exit %err%
 </file>
+        <dependency package="com.googlecode.windows-package-manager.NpackdInstallerHelper" versions="[1.22, 2)">
+            <variable>nih</variable>
+        </dependency>
+    </version>
 ```
 
-## InnoSetup via NpackdInstallerHelper ##
+## InnoSetup ##
 
-The recommended way to install an InnoSetup package is by using the NpackdInstallerHelper:
+The recommended way to install an InnoSetup package is by using the following scripts:
 ```XML
+    <version name="16.4" package="org.example.MyProgram" type="one-file">
+        <url>http://www.example.org/MyProgramInstaller.exe</url>
         <file path=".Npackd\Install.bat">"%NIH%\InstallInnoSetup.bat"</file>
         <file path=".Npackd\Uninstall.bat">"%NIH%\UninstallInnoSetup.bat" unins000.exe</file>
         <dependency package="com.googlecode.windows-package-manager.NpackdInstallerHelper" versions="[1.3, 2)">
             <variable>NIH</variable>
         </dependency>
+    </version>
 ```
 
-## Inno Setup ##
+## ZIP based distributions with an extra directory level with Npackd Installer Helper ##
+
+.Npackd\Install.bat sample:
+```XML
+    <version name="16.4" package="org.example.MyProgram" type="one-file">
+        <file path=".Npackd\Install.bat">for /f "delims=" %%x in ('dir /b aria*') do set name=%%x
+"%NIH%\ExtractDir.bat" "%name%"</file>
+        <dependency package="com.googlecode.windows-package-manager.NpackdInstallerHelper" versions="[1.3, 2)">
+            <variable>NIH</variable>
+        </dependency>
+    </version>
+```
+
+## InnoSetup settings ##
 
 .Npackd\Install.bat sample is below. Some Inno Setup un-installation routines delete all files in the installation directory. It is necessary to install packages in a subdirectory in such cases.
 ```Batchfile
@@ -95,14 +111,6 @@ Toolbar=0
 </file>
         <file path=".Npackd\Install.bat">for /f %%x in ('dir /b *.exe') do set setup=%%x
 "%setup%" /SP- /VERYSILENT /SUPPRESSMSGBOXES /NOCANCEL /NORESTART /DIR="%CD%" /SAVEINF="%CD%\.Npackd\InnoSetupInfo.ini" /LOG="%CD%\.Npackd\InnoSetupInstall.log" /LOADINF="%CD%\.Npackd\InnoSetupDef.ini"
-```
-
-.Npackd\Uninstall.bat sample is below. Note that the log file path must be absolute.
-```Batchfile
-unins000.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /LOG="%CD%\.Npackd\InnoSetupUninstall.log"
-set err=%errorlevel%
-type .Npackd\InnoSetupUninstall.log
-if %err% neq 0 exit %err%
 ```
 
 ## InstallShield ##
@@ -136,30 +144,6 @@ for /f "delims=" %%x in ('dir /b *.exe') do set setup=%%x
 .Npackd\Uninstall.bat sample:
 ```Batchfile
 un_SuperOrcaSetup_21233.exe /Silent /Hide
-```
-
-## ZIP based distributions with an extra directory level with Npackd Installer Helper ##
-
-.Npackd\Install.bat sample:
-```XML
-        <file path=".Npackd\Install.bat">for /f "delims=" %%x in ('dir /b aria*') do set name=%%x
-"%NIH%\ExtractDir.bat" "%name%"</file>
-        <dependency package="com.googlecode.windows-package-manager.NpackdInstallerHelper" versions="[1.3, 2)">
-            <variable>NIH</variable>
-        </dependency>
-```
-
-## ZIP based distributions with an extra directory level ##
-
-.Npackd\Install.bat sample:
-```Batchfile
-for /f "delims=" %%x in ('dir /b aria*') do set name=%%x
-cd "%name%"        
-for /f "delims=" %%a in ('dir /b') do (
-  move "%%a" ..
-)
-cd ..
-rmdir "%name%"
 ```
 
 ## Uninstall programs that cannot be forced to use a particular installation directory ##

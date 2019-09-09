@@ -1,7 +1,5 @@
 rem WARNING: since version 1.9 this script is deprecated and should not be used.
-rem The recommended way of installing a command line program is to create a new
-rem directory under "C:\Program Files", add it to the PATH environment variable
-rem and put the proxy .exe files there created by "EXE Proxy".
+rem The recommended way is to use the cmd-file XML tag in a repository.
 rem
 rem
 rem This script is available since version 1.7

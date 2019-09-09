@@ -1,3 +1,6 @@
+rem WARNING: since version 1.23 this script is deprecated and should not be used.
+rem Please use "ncl.exe remove-scp" command instead.
+rem 
 rem This script is available since version 1.20
 rem This script executes a .js file using Windows JScript interpreter cscript.exe.
 rem The variable "lib" will be automatically defined in the script and will point

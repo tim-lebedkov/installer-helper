@@ -1,3 +1,6 @@
+rem WARNING: since version 1.23 this script is deprecated and should not be used.
+rem Please use the 7-zip package instead.
+rem
 rem This script is available since version 1.19
 rem This script extracts .7z, .tar, .gz, .tar.gz or .tar.xz file or a directory.
 rem The original file or directory will be deleted.

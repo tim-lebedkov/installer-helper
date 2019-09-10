@@ -1,4 +1,6 @@
 /**
+ * WARNING: since version 1.23 this script is deprecated and should not be used.
+ * 
  * This script is available since version 1.10.
  *
  * This library contains useful code for installing and removing software.
